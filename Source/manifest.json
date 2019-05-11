@@ -1,11 +1,11 @@
 {
 	"manifest_version": 2,
 
-	"name": "Millennials to Snake People",
-    "short_name": "Snake People",
-	"description": "Replaces the text 'Millennial' with 'Snake People'.",
-	"author": "Eric Bailey",
-	"version": "2.3",
+	"name": "Illuminati Illuminator",
+    "short_name": "Illuminator",
+	"description": "Reveals hidden occult messages in every page you visit.",
+	"author": "Anthony Thomas & Jon Zimbel",
+	"version": "1.0",
 
 	"icons": {
 		"16": "icon16.png",
