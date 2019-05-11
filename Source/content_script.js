@@ -15,15 +15,7 @@ const randomChoice = options =>
 
 const getChars = str => [...str.toLowerCase()].filter(char => /\w/.test(char));
 
-const handleText = textNode => {
-  textNode.nodeValue = replaceText(textNode.nodeValue);
-};
-
-const replaceText = v => {
-  let result = v;
-  result = result.replace(/\b(T|t)he\b/g, '<em>PENIS.</em>');
-  return result;
-};
+const getCharsForReplace = str => [...str];
 
 // Returns true if a node should be checked for text to change
 const isCandidate = node =>
@@ -39,7 +31,9 @@ const isCandidate = node =>
     )
   );
 
-const walk = rootNode => {
+const walk = (characters, rootNode) => {
+  let toFindIndex = 0;
+
   // Find all the text nodes in rootNode
   const walker = document.createTreeWalker(
     rootNode,
@@ -49,10 +43,54 @@ const walk = rootNode => {
   );
   let node;
 
+  const updaters = [];
   // Modify each text node's value
   while (node = walker.nextNode()) {
-    handleText(node);
+    const result = handleText(node, characters, toFindIndex);
+    toFindIndex = result.toFindIndex;
+    updaters.push(result.updater);
+    if (toFindIndex === characters.length) {
+      break;
+    }
   }
+  updaters.forEach(
+    updater => {
+      updater();
+    }
+  );
+};
+
+const getHighlightedElement = str => {
+  const highlightedElement = document.createElement('strong');
+  // '#ff69b4'
+  highlightedElement.innerText = str;
+  highlightedElement.style.background = '#ff69b4';
+  highlightedElement.style.fontSize = '200%';
+  return highlightedElement;
+};
+
+const handleText = (textNode, characters, toFindIndex) => {
+  let newIndex = toFindIndex;
+  const newNodeParts =
+    getCharsForReplace(textNode.nodeValue)
+      .reduce((parts, char) => {
+        if (char.toLowerCase() === characters[newIndex]) {
+          newIndex++;
+          return parts.concat(getHighlightedElement(char));
+        } else if (parts.length > 0 && typeof parts[parts.length - 1] === 'string') {
+          parts[parts.length - 1] = parts[parts.length - 1].concat(char);
+          return parts;
+        } else {
+          return parts.concat(char);
+        }
+      }, []);
+  let updater = () => {};
+  if (newNodeParts.some(part => typeof part === 'object')) {
+    updater = () => {
+      textNode.replaceWith(...newNodeParts);
+    };
+  }
+  return {toFindIndex: newIndex, updater};
 };
 
 const charactersExistInDocument = (characters, rootNode) => {
@@ -93,21 +131,21 @@ const nodeCheck = (textNode, characters, toFindIndex) => {
 
 // Walk the doc (document) body, replace the title, and observe the body and title
 const checkAndReplace = doc => {
-  // const observerConfig = {
-  //   characterData: true,
-  //   childList: true,
-  //   subtree: true
-  // };
+  // only operate on pages that have a <main> element
+  const mainElements = doc.body.getElementsByTagName('main');
+  const hasMain = mainElements.length > 0;
+  if (hasMain) {
+    const main = mainElements[0];
+    // get the characters of a random conspiracy theory
+    const characters = getChars(getTheory());
 
-  // get the characters of a random conspiracy theory
-  const characters = getChars(getTheory());
-
-  // check if the string exists within the document
-  const exist = charactersExistInDocument(characters, doc.body);
-  console.log(exist);
-  if (exist) {
-    // Do the initial text replacements in the document body and title
-    walk(doc.body);
+    // check if the string exists within the document
+    const exist = charactersExistInDocument(characters, main);
+    console.log(exist);
+    if (exist) {
+      // Do the initial text replacements in the document body and title
+      walk(characters, main);
+    }
   }
 
   // Observe the body so that we replace text in any added/modified nodes
