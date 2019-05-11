@@ -1,9 +1,15 @@
 const theories = [
-  'Teachers are conspiring to bankrupt the nation.',
-  'The butler is conspiring to ruin the economy.',
-  'Prince is conspiring to blow things up.',
-  'The girlscouts are conspiring to keep a brotha down.',
-  'Lil Jon is the foreign policy adviser to the President'
+  'Lil Dicky is the foreign policy adviser to the President',
+  'The Illuminati owns Congress',
+  'Nine eleven was an inside job',
+  'Seven eleven was an inside job',
+  'The deep state knows where you live',
+  'Beyonce is not human',
+  'Birds are not real',
+  'Vaccines make you think the earth is round',
+  'Obama is Trumps cousin',
+  'The MBTA is the greatest transit system on earth',
+  'Water was created to keep the man down'
 ];
 
 const getTheory = () => {
@@ -60,12 +66,16 @@ const walk = (characters, rootNode) => {
   );
 };
 
+const getBackgroundColor = () => {
+  return randomChoice(['#ff69b4', '#56ff00', '#6a7e25', '#d6c601']);
+};
+
 const getHighlightedElement = str => {
   const highlightedElement = document.createElement('strong');
   // '#ff69b4'
   highlightedElement.innerText = str;
-  highlightedElement.style.background = '#ff69b4';
-  highlightedElement.style.fontSize = '200%';
+  highlightedElement.style.background = getBackgroundColor();
+  highlightedElement.style.fontSize = `${150 + Math.ceil((Math.random()*100))}%`;
   return highlightedElement;
 };
 
@@ -131,6 +141,7 @@ const nodeCheck = (textNode, characters, toFindIndex) => {
 
 // Walk the doc (document) body, replace the title, and observe the body and title
 const checkAndReplace = doc => {
+  debugger;
   // only operate on pages that have a <main> element
   const mainElements = doc.body.getElementsByTagName('main');
   const hasMain = mainElements.length > 0;
@@ -146,10 +157,8 @@ const checkAndReplace = doc => {
       // Do the initial text replacements in the document body and title
       walk(characters, main);
     }
+  } else {
+    console.log('No main 😢');
   }
-
-  // Observe the body so that we replace text in any added/modified nodes
-  // const bodyObserver = new MutationObserver(observerCallback);
-  // bodyObserver.observe(doc.body, observerConfig);
 };
 checkAndReplace(document);
