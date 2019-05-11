@@ -1,3 +1,19 @@
+const theories = [
+  'Teachers are conspiring to bankrupt the nation.',
+  'The butler is conspiring to ruin the economy.',
+  'Prince is conspiring to blow things up.',
+  'The girlscouts are conspiring to keep a brotha down.',
+  'Lil Jon is the foreign policy adviser to the President'
+]
+
+function theoryPull(){
+  return randomChoice(theories);
+}
+
+function randomChoice(options){
+  return options[Math.floor(Math.random()*options.length)];
+}
+
 function walk(rootNode)
 {
     // Find all the text nodes in rootNode
