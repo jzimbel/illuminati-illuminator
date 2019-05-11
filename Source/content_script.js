@@ -13,23 +13,7 @@ const getTheory = () => {
 const randomChoice = options =>
   options[Math.floor(Math.random()*options.length)];
 
-const walk = rootNode => {
-  // Find all the text nodes in rootNode
-  const walker = document.createTreeWalker(
-    rootNode,
-    NodeFilter.SHOW_TEXT,
-    null,
-    false
-  );
-  let node;
-
-  // Modify each text node's value
-  while (node = walker.nextNode()) {
-    handleText(node);
-  }
-};
-
-const getStringCharacters = str => [...str];
+const getChars = str => [...str.toLowerCase()].filter(char => /\w/.test(char));
 
 const handleText = textNode => {
   textNode.nodeValue = replaceText(textNode.nodeValue);
@@ -37,7 +21,7 @@ const handleText = textNode => {
 
 const replaceText = v => {
   let result = v;
-  result = result.replace(/\b(T|t)he\b/g, 'foobar');
+  result = result.replace(/\b(T|t)he\b/g, '<em>PENIS.</em>');
   return result;
 };
 
@@ -55,34 +39,79 @@ const isCandidate = node =>
     )
   );
 
-// The callback used for the document body and title observers
-const observerCallback = mutations => {
-  mutations.forEach(({addedNodes}) => {
-      Array.from(addedNodes)
-      .filter(isCandidate)
-      .forEach(node => {
-        if (node.nodeType === 3) {
-          handleText(node);
-        } else {
-          walk(node);
-        }
-      });
-  });
+const walk = rootNode => {
+  // Find all the text nodes in rootNode
+  const walker = document.createTreeWalker(
+    rootNode,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  let node;
+
+  // Modify each text node's value
+  while (node = walker.nextNode()) {
+    handleText(node);
+  }
 };
+
+const charactersExistInDocument = (characters, rootNode) => {
+  let toFindIndex = 0;
+  // Find all the text nodes in rootNode
+  const walker = document.createTreeWalker(
+    rootNode,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  let node;
+
+  // Modify each text node's value
+  while (node = walker.nextNode()) {
+    toFindIndex = nodeCheck(node, characters, toFindIndex);
+    if (toFindIndex === characters.length) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const nodeCheck = (textNode, characters, toFindIndex) => {
+  // looking for [a, c, d]
+  const chars = getChars(textNode.nodeValue);
+  // [a, b, c, d]
+  let newIndex = toFindIndex;
+  let i;
+  for (i = 0; i < chars.length; i++) {
+    let char = chars[i].toLowerCase();
+    if (char === characters[newIndex]) {
+      newIndex++;
+    }
+  }
+  return newIndex;
+}
 
 // Walk the doc (document) body, replace the title, and observe the body and title
-const walkAndObserve = doc => {
-  const observerConfig = {
-    characterData: true,
-    childList: true,
-    subtree: true
-  };
+const checkAndReplace = doc => {
+  // const observerConfig = {
+  //   characterData: true,
+  //   childList: true,
+  //   subtree: true
+  // };
 
-  // Do the initial text replacements in the document body and title
-  walk(doc.body);
+  // get the characters of a random conspiracy theory
+  const characters = getChars(getTheory());
+
+  // check if the string exists within the document
+  const exist = charactersExistInDocument(characters, doc.body);
+  console.log(exist);
+  if (exist) {
+    // Do the initial text replacements in the document body and title
+    walk(doc.body);
+  }
 
   // Observe the body so that we replace text in any added/modified nodes
-  const bodyObserver = new MutationObserver(observerCallback);
-  bodyObserver.observe(doc.body, observerConfig);
+  // const bodyObserver = new MutationObserver(observerCallback);
+  // bodyObserver.observe(doc.body, observerConfig);
 };
-walkAndObserve(document);
+checkAndReplace(document);
