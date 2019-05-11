@@ -1,4 +1,4 @@
-# Millennials to Snake People
+# Illuminati Illuminator
 
 Browser extension that reveals hidden occult messages in every page you visit. 👁
 
