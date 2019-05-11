@@ -15,7 +15,7 @@ const theories = [
 
 const getTheory = () => {
   return randomChoice(theories);
-}
+};
 
 const randomChoice = options =>
   options[Math.floor(Math.random() * options.length)];
@@ -27,15 +27,11 @@ const getCharsForReplace = str => [...str];
 // Returns true if a node should be checked for text to change
 const isCandidate = node =>
   !(
-    node.isContentEditable // DraftJS and many others
-    || (node.parentNode && node.parentNode.isContentEditable) // Special case for Gmail
-    || (
-      node.tagName // Some catch-alls
-      && (
-        node.tagName.toLowerCase() == 'textarea'
-        || node.tagName.toLowerCase() == 'input'
-      )
-    )
+    node.isContentEditable || // DraftJS and many others
+    (node.parentNode && node.parentNode.isContentEditable) || // Special case for Gmail
+    (node.tagName && // Some catch-alls
+      (node.tagName.toLowerCase() == 'textarea' ||
+        node.tagName.toLowerCase() == 'input'))
   );
 
 const walk = (characters, rootNode) => {
@@ -52,7 +48,7 @@ const walk = (characters, rootNode) => {
 
   const updaters = [];
   // Modify each text node's value
-  while (node = walker.nextNode()) {
+  while ((node = walker.nextNode())) {
     const result = handleText(node, characters, toFindIndex);
     toFindIndex = result.toFindIndex;
     updaters.push(result.updater);
@@ -61,17 +57,18 @@ const walk = (characters, rootNode) => {
     }
   }
   if (toFindIndex === characters.length) {
-    updaters.filter(updater => updater !== null).forEach(
-      updater => {
+    updaters
+      .filter(updater => updater !== null)
+      .forEach(updater => {
         updater();
-      }
-    );
+      });
   }
 };
 
-const getFontResize = () => `${150 + Math.ceil((Math.random()*100))}%`;
+const getFontResize = () => `${150 + Math.ceil(Math.random() * 100)}%`;
 
-const getBackgroundColor = () => randomChoice(['#ff69b4', '#56ff00', '#6a7e25', '#d6c601']);
+const getBackgroundColor = () =>
+  randomChoice(['#ff69b4', '#56ff00', '#6a7e25', '#d6c601']);
 
 const getHighlightedElement = str => {
   const highlightedElement = document.createElement('strong');
@@ -83,24 +80,30 @@ const getHighlightedElement = str => {
 
 const handleText = (textNode, characters, toFindIndex) => {
   let newIndex = toFindIndex;
-  const newNodeParts =
-    getCharsForReplace(textNode.nodeValue)
-      .reduce((parts, char) => {
-        if (char.toLowerCase() === characters[newIndex]) {
-          newIndex++;
-          return parts.concat(getHighlightedElement(char));
-        } else if (parts.length > 0 && typeof parts[parts.length - 1] === 'string') {
-          parts[parts.length - 1] = parts[parts.length - 1].concat(char);
-          return parts;
-        } else {
-          return parts.concat(char);
-        }
-      }, []);
+  const newNodeParts = getCharsForReplace(textNode.nodeValue).reduce(
+    (parts, char) => {
+      if (char.toLowerCase() === characters[newIndex]) {
+        newIndex++;
+        return parts.concat(getHighlightedElement(char));
+      } else if (
+        parts.length > 0 &&
+        typeof parts[parts.length - 1] === 'string'
+      ) {
+        parts[parts.length - 1] = parts[parts.length - 1].concat(char);
+        return parts;
+      } else {
+        return parts.concat(char);
+      }
+    },
+    []
+  );
   return {
     toFindIndex: newIndex,
-    updater: newNodeParts.some(part => typeof part === 'object') ? () => {
-      textNode.replaceWith(...newNodeParts);
-    } : null
+    updater: newNodeParts.some(part => typeof part === 'object')
+      ? () => {
+          textNode.replaceWith(...newNodeParts);
+        }
+      : null
   };
 };
 
