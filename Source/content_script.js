@@ -1,6 +1,6 @@
 const theories = [
   'Lil Dicky is the foreign policy adviser to the President',
-  'The Illuminati owns Congress',
+  'The Illuminati own Congress',
   'Nine eleven was an inside job',
   'Seven eleven was an inside job',
   'The deep state knows where you live',
@@ -9,7 +9,8 @@ const theories = [
   'Vaccines make you think the earth is round',
   'Obama is Trumps cousin',
   'The MBTA is the greatest transit system on earth',
-  'Water was created to keep the man down'
+  'Water was created to keep the man down',
+  'RuPaul is the one true god'
 ];
 
 const getTheory = () => {
@@ -17,7 +18,7 @@ const getTheory = () => {
 }
 
 const randomChoice = options =>
-  options[Math.floor(Math.random()*options.length)];
+  options[Math.floor(Math.random() * options.length)];
 
 const getChars = str => [...str.toLowerCase()].filter(char => /\w/.test(char));
 
@@ -59,23 +60,24 @@ const walk = (characters, rootNode) => {
       break;
     }
   }
-  updaters.forEach(
-    updater => {
-      updater();
-    }
-  );
+  if (toFindIndex === characters.length) {
+    updaters.filter(updater => updater !== null).forEach(
+      updater => {
+        updater();
+      }
+    );
+  }
 };
 
-const getBackgroundColor = () => {
-  return randomChoice(['#ff69b4', '#56ff00', '#6a7e25', '#d6c601']);
-};
+const getFontResize = () => `${150 + Math.ceil((Math.random()*100))}%`;
+
+const getBackgroundColor = () => randomChoice(['#ff69b4', '#56ff00', '#6a7e25', '#d6c601']);
 
 const getHighlightedElement = str => {
   const highlightedElement = document.createElement('strong');
-  // '#ff69b4'
   highlightedElement.innerText = str;
   highlightedElement.style.background = getBackgroundColor();
-  highlightedElement.style.fontSize = `${150 + Math.ceil((Math.random()*100))}%`;
+  highlightedElement.style.fontSize = getFontResize();
   return highlightedElement;
 };
 
@@ -94,54 +96,16 @@ const handleText = (textNode, characters, toFindIndex) => {
           return parts.concat(char);
         }
       }, []);
-  let updater = () => {};
-  if (newNodeParts.some(part => typeof part === 'object')) {
-    updater = () => {
+  return {
+    toFindIndex: newIndex,
+    updater: newNodeParts.some(part => typeof part === 'object') ? () => {
       textNode.replaceWith(...newNodeParts);
-    };
-  }
-  return {toFindIndex: newIndex, updater};
+    } : null
+  };
 };
 
-const charactersExistInDocument = (characters, rootNode) => {
-  let toFindIndex = 0;
-  // Find all the text nodes in rootNode
-  const walker = document.createTreeWalker(
-    rootNode,
-    NodeFilter.SHOW_TEXT,
-    null,
-    false
-  );
-  let node;
-
-  // Modify each text node's value
-  while (node = walker.nextNode()) {
-    toFindIndex = nodeCheck(node, characters, toFindIndex);
-    if (toFindIndex === characters.length) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const nodeCheck = (textNode, characters, toFindIndex) => {
-  // looking for [a, c, d]
-  const chars = getChars(textNode.nodeValue);
-  // [a, b, c, d]
-  let newIndex = toFindIndex;
-  let i;
-  for (i = 0; i < chars.length; i++) {
-    let char = chars[i].toLowerCase();
-    if (char === characters[newIndex]) {
-      newIndex++;
-    }
-  }
-  return newIndex;
-}
-
-// Walk the doc (document) body, replace the title, and observe the body and title
+// Walk the doc (document) body and highlight characters in the conspiracy theory
 const checkAndReplace = doc => {
-  debugger;
   // only operate on pages that have a <main> element
   const mainElements = doc.body.getElementsByTagName('main');
   const hasMain = mainElements.length > 0;
@@ -150,15 +114,7 @@ const checkAndReplace = doc => {
     // get the characters of a random conspiracy theory
     const characters = getChars(getTheory());
 
-    // check if the string exists within the document
-    const exist = charactersExistInDocument(characters, main);
-    console.log(exist);
-    if (exist) {
-      // Do the initial text replacements in the document body and title
-      walk(characters, main);
-    }
-  } else {
-    console.log('No main 😢');
+    walk(characters, main);
   }
 };
 checkAndReplace(document);
