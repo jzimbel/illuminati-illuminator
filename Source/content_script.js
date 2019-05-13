@@ -49,9 +49,9 @@ const walk = (characters, rootNode) => {
   const updaters = [];
   // Modify each text node's value
   while ((node = walker.nextNode())) {
-    const result = handleText(node, characters, toFindIndex);
-    toFindIndex = result.toFindIndex;
-    updaters.push(result.updater);
+    const {offset, updater} = handleText(node, characters.slice(toFindIndex));
+    toFindIndex += offset;
+    updaters.push(updater);
     if (toFindIndex === characters.length) {
       break;
     }
@@ -65,25 +65,28 @@ const walk = (characters, rootNode) => {
   }
 };
 
-const getFontResize = () => `${150 + Math.ceil(Math.random() * 100)}%`;
+const getFontResize = () => `${100 + Math.ceil(Math.random() * 100)}%`;
 
 const getBackgroundColor = () =>
   randomChoice(['#ff69b4', '#56ff00', '#6a7e25', '#d6c601']);
+
+const getFontFamily = () => randomChoice(['sans-serif', 'serif', 'cursive', 'monospace']);
 
 const getHighlightedElement = str => {
   const highlightedElement = document.createElement('strong');
   highlightedElement.innerText = str;
   highlightedElement.style.background = getBackgroundColor();
   highlightedElement.style.fontSize = getFontResize();
+  highlightedElement.style.fontFamily = getFontFamily();
   return highlightedElement;
 };
 
-const handleText = (textNode, characters, toFindIndex) => {
-  let newIndex = toFindIndex;
+const handleText = (textNode, characters) => {
+  let offset = 0;
   const newNodeParts = getCharsForReplace(textNode.nodeValue).reduce(
     (parts, char) => {
-      if (char.toLowerCase() === characters[newIndex]) {
-        newIndex++;
+      if (char.toLowerCase() === characters[offset]) {
+        offset++;
         return parts.concat(getHighlightedElement(char));
       } else if (
         parts.length > 0 &&
@@ -98,7 +101,7 @@ const handleText = (textNode, characters, toFindIndex) => {
     []
   );
   return {
-    toFindIndex: newIndex,
+    offset,
     updater: newNodeParts.some(part => typeof part === 'object')
       ? () => {
           textNode.replaceWith(...newNodeParts);
@@ -108,8 +111,8 @@ const handleText = (textNode, characters, toFindIndex) => {
 };
 
 // Walk the doc (document) body and highlight characters in the conspiracy theory
-const checkAndReplace = doc => {
-  // only operate on pages that have a <main> element
+const highlightSuspiciousCharacters = doc => {
+  // only operate on pages that have a <main> element so that we have more of a chance of all of the
   const mainElements = doc.body.getElementsByTagName('main');
   const hasMain = mainElements.length > 0;
   if (hasMain) {
@@ -120,4 +123,4 @@ const checkAndReplace = doc => {
     walk(characters, main);
   }
 };
-checkAndReplace(document);
+highlightSuspiciousCharacters(document);
