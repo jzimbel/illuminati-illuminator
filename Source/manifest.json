@@ -1,26 +1,25 @@
 {
-	"manifest_version": 2,
+  "manifest_version": 2,
 
-	"name": "Illuminati Illuminator",
-    "short_name": "Illuminator",
-	"description": "Reveals hidden occult messages in every page you visit.",
-	"author": "Anthony Thomas & Jon Zimbel",
-	"version": "1.0",
+  "name": "Illuminati Illuminator",
+  "short_name": "Illuminator",
+  "description": "Reveals hidden occult messages in every page you visit.",
+  "author": "Anthony Thomas & Jon Zimbel",
+  "version": "1.0",
 
-	"icons": {
-		"16": "icon16.png",
-		"32": "icon32.png",
-		"48": "icon48.png",
-		"128": "icon128.png"
-	},
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
 
-	"content_scripts":
-	[
-		{
-			"matches": ["*://*/*"],
-			"all_frames": true,
-			"js": ["content_script.js"],
-			"run_at": "document_end"
-		}
-	]
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "all_frames": true,
+      "js": ["content_script.js"],
+      "run_at": "document_end"
+    }
+  ]
 }
